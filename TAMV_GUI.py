@@ -362,6 +362,8 @@ class CameraSettingsDialog(QDialog):
         self.hue_box.setLayout(hvbox)
         hvbox.addWidget(self.hue_slider)
         hvbox.addWidget(self.hue_label)
+        # Threshold
+        #self.th_box = QGroupBox('Threshold')
         # Reset button
         self.layout.addWidget(self.reset_button)
         self.layout.addWidget(self.save_button)
@@ -557,7 +559,7 @@ class CalibrateNozzles(QThread):
         if self.loose:
             self.loose = False
         else: self.loose = True
-
+        
     def setProperty(self,brightness=-1, contrast=-1, saturation=-1, hue=-1):
         try:
             if int(brightness) >= 0:
@@ -1172,6 +1174,8 @@ class App(QMainWindow):
         self.setWindowFlag(Qt.WindowContextHelpButtonHint,False)
         self.setWindowTitle('TAMV')
         self.setWindowIcon(QIcon('jubilee.png'))
+        self.detect_th1 = 5
+        self.detect_th2 = 200
         global display_width, display_height
         screen = QDesktopWidget().availableGeometry()
         self.small_display = False
@@ -1326,6 +1330,35 @@ class App(QMainWindow):
         self.cp_button.setFixedWidth(170)
         #self.cp_button.setStyleSheet(style_disabled)
         self.cp_button.setDisabled(True)
+        #Threshold setter
+        ###############################################
+        # #Min Threshold slider
+        self.min_thslider = QSlider(Qt.Horizontal)
+        self.min_thslider.setMinimum(0)
+        self.min_thslider.setValue(int(self.detect_th1))
+        self.min_thslider.valueChanged.connect(self.changeThresholdSlider)
+        self.min_thslider.setTickPosition(QSlider.TicksBelow)
+        self.min_thslider.setTickInterval(5)
+        self.min_thslider_label = QLabel(str(int(self.detect_th1)))
+        self.min_thslider.setVisible(False)
+
+        # #Max Threshold slider
+        self.max_thslider = QSlider(Qt.Horizontal)
+        self.max_thslider.setMinimum(int(self.min_thslider.value()))
+        self.max_thslider.setMaximum(255)
+        self.max_thslider.setValue(int(self.detect_th2))
+        self.max_thslider.valueChanged.connect(self.changeThresholdSlider)
+        self.max_thslider.setTickPosition(QSlider.TicksBelow)
+        self.max_thslider.setTickInterval(5)
+        self.max_thslider_label = QLabel(str(int(self.detect_th2)))
+        self.max_thslider.setVisible(False)
+        self.min_thslider.setMaximum(self.max_thslider.value())
+        # Thresholdset button
+        self.set_thres_button = QPushButton('Set Binary Threshold limit')
+        self.set_thres_button.setToolTip('Define pixel brightness thesholds for finding circle borders')
+        self.set_thres_button.clicked.connect(self.changeThreshold)
+        ###############################################
+        
         # Calibration
         self.calibration_button = QPushButton('Start Tool Alignment')
         self.calibration_button.setToolTip('Start alignment process.\nMAKE SURE YOUR CARRIAGE IS CLEAR TO MOVE ABOUT WITHOUT COLLISIONS!')
@@ -1412,7 +1445,12 @@ class App(QMainWindow):
         grid.addWidget(self.toolBox,1,5,1,1)
         grid.addWidget(self.disconnection_button,1,7,1,-1,Qt.AlignLeft)
         # SECOND ROW
-        
+        grid.addWidget(self.min_thslider,2,1,1,2)
+        grid.addWidget(self.min_thslider_label,2,3,1,1)
+        grid.addWidget(self.max_thslider,2,4,1,2)
+        grid.addWidget(self.max_thslider_label,2,6,1,1)
+        grid.addWidget(self.set_thres_button,2,7,1,1)
+        ####
         # THIRD ROW
         # main image viewer
         grid.addWidget(self.image_label,3,1,4,6)
@@ -1433,6 +1471,21 @@ class App(QMainWindow):
         # flag to draw circle
         self.crosshair = False
 
+
+    def changeThresholdSlider(self):
+        self.min_thslider_label.setText(str(int(self.min_thslider.value())))
+        self.max_thslider_label.setText(str(int(self.max_thslider.value())))
+
+                                                
+    def changeThreshold(self):
+        if(self.detect_th1 != int(self.min_thslider.value()) or self.detect_th2 != int(self.max_thslider.value())):
+            self.detect_th1 = int(self.min_thslider.value())
+            self.detect_th2 = int(self.max_thslider.value())
+            self.min_thslider.setMaximum(int(self.max_thslider.value()))
+            self.max_thslider.setMinimum(int(self.min_thslider.value()))
+            self.statusBar.showMessage(f"Binary thresholds change to: {self.detect_th1}, {self.detect_th2}.")
+            self.detector_changed = True
+        
     def toggle_detect(self):
         self.video_thread.display_crosshair = not self.video_thread.display_crosshair
         self.video_thread.detection_on = not self.video_thread.detection_on
@@ -1441,11 +1494,19 @@ class App(QMainWindow):
             self.xray_box.setVisible(True)
             self.loose_box.setDisabled(False)
             self.loose_box.setVisible(True)
+            self.set_thres_button.setDisabled(False)
+            self.set_thres_button.setVisible(True)
+            self.min_thslider.setVisible(True)
+            self.max_thslider.setVisible(True)
         else:
             self.xray_box.setDisabled(True)
             self.xray_box.setVisible(False)
             self.loose_box.setDisabled(True)
             self.loose_box.setVisible(False)
+            self.set_thres_button.setDisabled(True)
+            self.set_thres_button.setVisible(False)
+            self.min_thslider.setVisible(True)
+            self.max_thslider.setVisible(True)
             self.updateStatusbar('Detection: OFF')
 
     def cleanPrinterURL(self, inputString='http://localhost'):
