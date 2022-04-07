@@ -40,6 +40,7 @@ sudo apt-get install -y build-essential cmake
 # GUI (if you want GTK, change 'qt5-default' to 'libgtkglext1-dev' and remove '-DWITH_QT=ON'):
 sudo apt-get install -y qt5-default libvtk6-dev
 
+
 # Media I/O:
 sudo apt-get install -y zlib1g-dev libjpeg-dev libwebp-dev libpng-dev libtiff5-dev libjasper-dev \
                         libopenexr-dev libgdal-dev
@@ -104,3 +105,5 @@ curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 sudo python3 get-pip.py
 rm get-pip.py
 sudo pip install imutils
+# Actually forces some dependencies in there
+sudo apt-get install -y qt5-dev-tools python3-matplotlib python3-opencv
