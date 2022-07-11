@@ -106,4 +106,5 @@ sudo python3 get-pip.py
 rm get-pip.py
 sudo pip install imutils
 # Actually forces some dependencies in there
-sudo apt-get install -y qt5-dev-tools python3-matplotlib python3-opencv
+#sudo apt-get install -y qt5-dev-tools python3-matplotlib python3-opencv
+sudo apt-get install -y qtools5-dev-tools python3-matplotlib python3-opencv

@@ -1287,10 +1287,12 @@ class App(QMainWindow):
         self.loadUserParameters()
         # GUI ELEMENTS DEFINITION
         # Menubar
-        if not self.small_display:
-            self._createActions()
-            self._createMenuBar()
-            self._connectActions()
+        #small_display requirement causes crash on 7 inch rpi displays
+        #Due to missing self.analysisMenu
+        #if not self.small_display:
+        self._createActions()
+        self._createMenuBar()
+        self._connectActions()
         self.centralWidget = QWidget()
         self.setCentralWidget(self.centralWidget)
         # create the label that holds the image
