@@ -120,7 +120,7 @@ _[back to top](#table-of-contents)_
    
    type `cd`, and hit enter
    
-   type `git clone https://github.com/HaythamB/TAMV` and hit enter
+   type `git clone https://github.com/OllePonten/TAMV` and hit enter
    
 2. type `cd TAMV` and press enter
 3. Run `~/TAMV/install_opencv.sh`
