@@ -1342,6 +1342,7 @@ class App(QMainWindow):
         self.min_thslider.setTickPosition(QSlider.TicksBelow)
         self.min_thslider.setTickInterval(5)
         self.min_thslider_label = QLabel(str(int(self.detect_th1)))
+        self.min_thslider_label.setVisible(False)
         self.min_thslider.setVisible(False)
 
         # #Max Threshold slider
@@ -1353,6 +1354,7 @@ class App(QMainWindow):
         self.max_thslider.setTickPosition(QSlider.TicksBelow)
         self.max_thslider.setTickInterval(5)
         self.max_thslider_label = QLabel(str(int(self.detect_th2)))
+        self.max_thslider_label.setVisible(False)
         self.max_thslider.setVisible(False)
         self.min_thslider.setMaximum(self.max_thslider.value())
         # Thresholdset button
@@ -1500,6 +1502,8 @@ class App(QMainWindow):
             self.set_thres_button.setVisible(True)
             self.min_thslider.setVisible(True)
             self.max_thslider.setVisible(True)
+            self.min_thslider_label.setVisible(True)
+            self.max_thslider_label.setVisible(True)
         else:
             self.xray_box.setDisabled(True)
             self.xray_box.setVisible(False)
@@ -1507,8 +1511,10 @@ class App(QMainWindow):
             self.loose_box.setVisible(False)
             self.set_thres_button.setDisabled(True)
             self.set_thres_button.setVisible(False)
-            self.min_thslider.setVisible(True)
-            self.max_thslider.setVisible(True)
+            self.min_thslider.setVisible(False)
+            self.max_thslider.setVisible(False)
+            self.min_thslider_label.setVisible(False)
+            self.max_thslider_label.setVisible(False)
             self.updateStatusbar('Detection: OFF')
 
     def cleanPrinterURL(self, inputString='http://localhost'):
