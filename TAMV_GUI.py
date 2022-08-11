@@ -1822,6 +1822,11 @@ class App(QMainWindow):
         self.cp_button.setDisabled(False)
         self.jogpanel_button.setDisabled(False)
         self.analysisMenu.setDisabled(True)
+        self.min_thslider_label.setVisible(True)
+        self.min_thslider.setVisible(True)
+        self.max_thslider_label.setVisible(True)
+        self.max_thslider.setVisible(True)
+        self.set_thres_button.setVisible(True)
         # update connection status indicator to green
         self.connection_status.setStyleSheet(style_green)
         self.cp_label.setStyleSheet(style_red)
@@ -1983,6 +1988,12 @@ class App(QMainWindow):
         self.video_thread.alignment = False
         self.calibration_button.setDisabled(False)
         self.cp_button.setDisabled(False)
+        self.min_thslider_label.setVisible(True)
+        self.min_thslider.setVisible(True)
+        self.max_thslider_label.setVisible(True)
+        self.max_thslider.setVisible(True)
+        self.set_thres_button.setVisible(True)
+
 
         self.toolBox.setVisible(True)
         self.repeatSpinBox.setDisabled(False)
@@ -2260,6 +2271,11 @@ class App(QMainWindow):
         self.xray_box.setChecked(False)
         self.loose_box.setDisabled(True)
         self.toolBox.setVisible(False)
+        self.min_thslider_label.setVisible(False)
+        self.min_thslider.setVisible(False)
+        self.max_thslider_label.setVisible(False)
+        self.max_thslider.setVisible(False)
+        self.set_thres_button.setVisible(False)
         self.repaint()
         # End video threads and restart default thread
         # Clean up threads and detection
