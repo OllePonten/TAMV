@@ -60,6 +60,10 @@ import datetime
 import json
 import time
 
+
+import ipdb
+
+
 # graphing imports
 import matplotlib
 import matplotlib.pyplot as plt
@@ -426,6 +430,7 @@ class CameraSettingsDialog(QDialog):
         i = 6
         index = 0
         self.camera_combo.clear()
+        ipdb.set_trace()
         _cameras = []
         original_camera_description = str(video_src) + ': ' \
             + str(self.parent().video_thread.cap.get(cv2.CAP_PROP_FRAME_WIDTH)) \
@@ -493,12 +498,13 @@ class CalibrateNozzles(QThread):
     display_crosshair = False
     detection_on = False
 
-    def __init__(self, parent=None, th1=1, th2=50, thstep=1, minArea=600, minCircularity=0.8,numTools=0,cycles=1, align=False):
+    def __init__(self, parent=None, th1=1, th2=50, thstep=1, minArea=200, minCircularity=0.8,numTools=0,cycles=1, align=False):
         super(QThread,self).__init__(parent=parent)
         # transformation matrix
         self.transform_matrix = []
         self.xray = False
         self.loose = False
+        self.invert = False
         self.detector_changed = False
         self.detect_th1 = th1
         self.detect_th2 = th2
@@ -559,6 +565,11 @@ class CalibrateNozzles(QThread):
         if self.loose:
             self.loose = False
         else: self.loose = True
+        
+    def toggleInvert(self):
+        if self.invert:
+            self.invert = False
+        else: self.invert = True
         
     def setProperty(self,brightness=-1, contrast=-1, saturation=-1, hue=-1):
         try:
@@ -778,6 +789,7 @@ class CalibrateNozzles(QThread):
             yuvPlanes[0] = cv2.GaussianBlur(yuvPlanes[0],(7,7),6)
             yuvPlanes[0] = cv2.adaptiveThreshold(yuvPlanes[0],255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,35,1)
             self.frame = cv2.cvtColor(yuvPlanes[0],cv2.COLOR_GRAY2BGR)
+
             target = [int(np.around(self.frame.shape[1]/2)),int(np.around(self.frame.shape[0]/2))]
             # Process runtime algorithm changes
             if self.loose:
@@ -791,6 +803,13 @@ class CalibrateNozzles(QThread):
             # draw the timestamp on the frame AFTER the circle detector! Otherwise it finds the circles in the numbers.
             if self.xray:
                 cleanFrame = self.frame
+            if self.invert:
+                cleanFrame = cv2.bitwise_not(self.frame)
+                keypoints = self.detector.detect(cv2.bitwise_not(self.frame))
+                if(len(keypoints)>0):
+                    self.frame = self.putText(self.frame,'Inverted circles found',offsety=1)
+                else:
+                    self.frame = self.putText(self.frame,'No inverted circles found',offsety=1)
             # check if we are displaying a crosshair
             if self.display_crosshair:
                 self.frame = cv2.line(cleanFrame, (target[0],    target[1]-25), (target[0],    target[1]+25), (0, 255, 0), 1)
@@ -1433,6 +1452,12 @@ class App(QMainWindow):
         self.loose_box.stateChanged.connect(self.toggle_loose)
         self.loose_box.setDisabled(True)
         self.loose_box.setVisible(False)
+        # Invert checkbox
+        self.invert_box = QCheckBox('Invert intensities')
+        self.invert_box.setChecked(False)
+        self.invert_box.stateChanged.connect(self.toggle_invert)
+        self.invert_box.setDisabled(True)
+        self.invert_box.setVisible(False)
         # Detection checkbox
         self.detect_box = QCheckBox('Detect ON')
         self.detect_box.setChecked(False)
@@ -1446,7 +1471,8 @@ class App(QMainWindow):
         grid.addWidget(self.detect_box,1,2,1,1)
         grid.addWidget(self.xray_box,1,3,1,1)
         grid.addWidget(self.loose_box,1,4,1,1)
-        grid.addWidget(self.toolBox,1,5,1,1)
+        grid.addWidget(self.invert_box,1,5,1,1)
+        grid.addWidget(self.toolBox,1,6,1,1)
         grid.addWidget(self.disconnection_button,1,7,1,-1,Qt.AlignLeft)
         # SECOND ROW
         grid.addWidget(self.min_thslider,2,1,1,2)
@@ -1498,6 +1524,8 @@ class App(QMainWindow):
             self.xray_box.setVisible(True)
             self.loose_box.setDisabled(False)
             self.loose_box.setVisible(True)
+            self.invert_box.setDisabled(False)
+            self.invert_box.setVisible(True)
             self.set_thres_button.setDisabled(False)
             self.set_thres_button.setVisible(True)
             self.min_thslider.setVisible(True)
@@ -1509,6 +1537,8 @@ class App(QMainWindow):
             self.xray_box.setVisible(False)
             self.loose_box.setDisabled(True)
             self.loose_box.setVisible(False)
+            self.invert_box.setDisabled(False)
+            self.invert_box.setVisible(True)
             self.set_thres_button.setDisabled(True)
             self.set_thres_button.setVisible(False)
             self.min_thslider.setVisible(False)
@@ -1725,6 +1755,9 @@ class App(QMainWindow):
         self.loose_box.setDisabled(True)
         self.loose_box.setChecked(False)
         self.loose_box.setVisible(False)
+        self.invert_box.setDisabled(True)
+        self.invert_box.setChecked(False)
+        self.invert_box.setVisible(False)
         self.repaint()
         try:
             # check if printerURL has already been defined (user reconnecting)
@@ -1982,6 +2015,9 @@ class App(QMainWindow):
         self.loose_box.setDisabled(True)
         self.loose_box.setChecked(False)
         self.loose_box.setVisible(False)
+        self.invert_box.setDisabled(True)
+        self.invert_box.setChecked(False)
+        self.invert_box.setVisible(False)
         self.video_thread.detection_on = False
         self.video_thread.loose = False
         self.video_thread.xray = False
@@ -2398,6 +2434,14 @@ class App(QMainWindow):
         except Exception as e1:
             self.updateStatusbar('Detection thread not running.')
             print( 'Detection thread error in LOOSE: ')
+            print(e1)
+
+    def toggle_invert(self):
+        try:
+            self.video_thread.toggleInvert()
+        except Exception as e1:
+            self.updateStatusbar('Detection thread not running.')
+            print( 'Detection thread error in INVERT: ')
             print(e1)
 
     @pyqtSlot(str)
