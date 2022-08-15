@@ -427,7 +427,6 @@ class CameraSettingsDialog(QDialog):
         i = 6
         index = 0
         self.camera_combo.clear()
-        ipdb.set_trace()
         _cameras = []
         original_camera_description = str(video_src) + ': ' \
             + str(self.parent().video_thread.cap.get(cv2.CAP_PROP_FRAME_WIDTH)) \
