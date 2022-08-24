@@ -794,18 +794,15 @@ class CalibrateNozzles(QThread):
             if self.detector_changed:
                 self.createDetector()
                 self.detector_changed = False
-            # run nozzle detection for keypoints
-            keypoints = self.detector.detect(self.frame)
             # draw the timestamp on the frame AFTER the circle detector! Otherwise it finds the circles in the numbers.
             if self.xray:
                 cleanFrame = self.frame
+            # run nozzle detection for keypoints
             if self.invert:
                 cleanFrame = cv2.bitwise_not(self.frame)
-                keypoints = self.detector.detect(cv2.bitwise_not(self.frame))
-                if(len(keypoints)>0):
-                    self.frame = self.putText(self.frame,'Inverted circles found',offsety=1)
-                else:
-                    self.frame = self.putText(self.frame,'No inverted circles found',offsety=1)
+                keypoints = self.detector.detect(cleanFrame)
+            else:
+                keypoints = self.detector.detect(self.frame)
             # check if we are displaying a crosshair
             if self.display_crosshair:
                 self.frame = cv2.line(cleanFrame, (target[0],    target[1]-25), (target[0],    target[1]+25), (0, 255, 0), 1)
