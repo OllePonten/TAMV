@@ -802,6 +802,7 @@ class CalibrateNozzles(QThread):
             # run nozzle detection for keypoints
             if self.invert:
                 cleanFrame = cv2.bitwise_not(self.frame)
+                self.frame = cv2.bitwise_not(self.frame)
                 keypoints = self.detector.detect(cleanFrame)
             else:
                 keypoints = self.detector.detect(self.frame)
