@@ -494,7 +494,7 @@ class CalibrateNozzles(QThread):
     display_crosshair = False
     detection_on = False
 
-    def __init__(self, parent=None, th1=1, th2=50, thstep=1, minArea=200, minCircularity=0.8,numTools=0,cycles=1, align=False):
+    def __init__(self, parent=None, th1=1, th2=50, thstep=1, minArea=150, minCircularity=0.6,numTools=0,cycles=1, align=False):
         super(QThread,self).__init__(parent=parent)
         # transformation matrix
         self.transform_matrix = []
@@ -607,7 +607,7 @@ class CalibrateNozzles(QThread):
                     try:
                         if self.loose:
                             self.detect_minCircularity = 0.3
-                        else: self.detect_minCircularity = 0.8
+                        else: self.detect_minCircularity = 0.6
                         if self.detector_changed:
                             self.createDetector()
                             self.detector_changed = False
@@ -649,7 +649,7 @@ class CalibrateNozzles(QThread):
                                     # Process runtime algorithm changes
                                     if self.loose:
                                         self.detect_minCircularity = 0.3
-                                    else: self.detect_minCircularity = 0.8
+                                    else: self.detect_minCircularity = 0.6
                                     if self.detector_changed:
                                         self.createDetector()
                                         self.detector_changed = False
@@ -688,7 +688,7 @@ class CalibrateNozzles(QThread):
                     try:
                         if self.loose:
                             self.detect_minCircularity = 0.3
-                        else: self.detect_minCircularity = 0.8
+                        else: self.detect_minCircularity = 0.6
                         self._running = True
                         # transformation matrix
                         #self.transform_matrix = []
@@ -698,7 +698,7 @@ class CalibrateNozzles(QThread):
                             # Process runtime algorithm changes
                             if self.loose:
                                 self.detect_minCircularity = 0.3
-                            else: self.detect_minCircularity = 0.8
+                            else: self.detect_minCircularity = 0.6
                             if self.detector_changed:
                                 self.createDetector()
                                 self.detector_changed = False
@@ -1693,7 +1693,7 @@ class App(QMainWindow):
 
     def startVideo(self):
         # create the video capture thread
-        self.video_thread = CalibrateNozzles(parent=self,numTools=0, cycles=1,minArea=600, align=False)
+        self.video_thread = CalibrateNozzles(parent=self,numTools=0, cycles=1,minArea=150, align=False)
         # connect its signal to the update_image slot
         # connect its signal to the update_image slot
         self.video_thread.detection_error.connect(self.updateStatusbar)
